@@ -1,7 +1,9 @@
 package com.bongf.oauthPractice.controller;
 
+import com.bongf.oauthPractice.GithubProfile;
 import com.bongf.oauthPractice.OAuthToken;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,22 +42,42 @@ public class OauthController {
         HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(params, headers);
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.exchange("https://github.com/login/oauth/access_token",
-        HttpMethod.POST,
-        tokenRequest,
-        String.class);
-
-        System.out.println(response.getStatusCode());
-        System.out.println(response.getBody());
+                HttpMethod.POST,
+                tokenRequest,
+                String.class);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        OAuthToken oAuthToken;
+        OAuthToken oAuthToken = null;
         try {
             oAuthToken = objectMapper.readValue(response.getBody(), OAuthToken.class);
-            System.out.println(oAuthToken.getAccesToken());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
+        RestTemplate infoRequest = new RestTemplate();
+
+        HttpHeaders infoRequestHeaders = new HttpHeaders();
+        infoRequestHeaders.add("Authorization", "token " + oAuthToken.getAccesToken());
+
+        HttpEntity<MultiValueMap<String, String>> githubProfileRequest = new HttpEntity<>(infoRequestHeaders);
+
+        ResponseEntity<String> profileResponse = infoRequest.exchange(
+                "https://api.github.com/user",
+                HttpMethod.GET,
+                githubProfileRequest,
+                String.class
+        );
+
+        ObjectMapper objectMapper2 = new ObjectMapper();
+        GithubProfile githubProfile = null;
+
+        try {
+            githubProfile = objectMapper2.readValue(profileResponse.getBody(), GithubProfile.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(githubProfile.toString());
         return "hello";
     }
 }
