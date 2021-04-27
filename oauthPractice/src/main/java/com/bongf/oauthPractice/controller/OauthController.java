@@ -13,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -53,7 +51,7 @@ public class OauthController {
         OAuthToken oAuthToken;
         try {
             oAuthToken = objectMapper.readValue(response.getBody(), OAuthToken.class);
-            System.out.println(oAuthToken.getAccess_token());
+            System.out.println(oAuthToken.getAccesToken());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

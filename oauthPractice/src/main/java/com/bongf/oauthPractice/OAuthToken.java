@@ -1,20 +1,22 @@
 package com.bongf.oauthPractice;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
-@Data
 public class OAuthToken {
-    private String access_token;
-    private String token_type;
+    private String accesToken;
+    private String tokenType;
     private String scope;
     private String bearer;
 
-    public void setAccess_token(String access_token) {
-        this.access_token = access_token;
+    @JsonProperty("access_token")
+    public void setAccesToken(String accesToken) {
+        this.accesToken = accesToken;
     }
 
-    public void setToken_type(String token_type) {
-        this.token_type = token_type;
+    @JsonProperty("token_type")
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 
     public void setScope(String scope) {
@@ -25,12 +27,12 @@ public class OAuthToken {
         this.bearer = bearer;
     }
 
-    public String getAccess_token() {
-        return access_token;
+    public String getAccesToken() {
+        return accesToken;
     }
 
-    public String getToken_type() {
-        return token_type;
+    public String getTokenType() {
+        return tokenType;
     }
 
     public String getScope() {
