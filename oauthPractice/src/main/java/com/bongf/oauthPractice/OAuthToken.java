@@ -1,7 +1,6 @@
 package com.bongf.oauthPractice;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 
 public class OAuthToken {
     private String accesToken;

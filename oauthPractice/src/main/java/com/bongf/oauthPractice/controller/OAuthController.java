@@ -18,13 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
-public class OauthController {
+public class OAuthController {
     private final String REDIRECT_URL = "http://localhost:8080/login/oauth2/code/github";
-    Logger logger = LoggerFactory.getLogger(OauthController.class);
+    private final String TOKEN_REQUEST_URL = "https://github.com/login/oauth/access_token";
+    private final String PROFILE_REQUEST_URL = "https://api.github.com/user";
+
+    Logger logger = LoggerFactory.getLogger(OAuthController.class);
 
     private final Environment environment;
 
-    public OauthController(Environment environment) {
+    public OAuthController(Environment environment) {
         this.environment = environment;
     }
 
@@ -38,7 +41,7 @@ public class OauthController {
     private GithubProfile getGithubProfile(OAuthToken oAuthToken) throws JsonProcessingException {
         RestTemplate profileRequestTemplate = new RestTemplate();
         ResponseEntity<String> profileResponse = profileRequestTemplate.exchange(
-                REDIRECT_URL,
+                PROFILE_REQUEST_URL,
                 HttpMethod.GET,
                 getProfileRequestEntity(oAuthToken),
                 String.class
@@ -57,7 +60,7 @@ public class OauthController {
     private OAuthToken getOAuthToken(String code) throws JsonProcessingException {
         HttpEntity<MultiValueMap<String, String>> codeRequestHttpEntity = getCodeRequestHttpEntity(code);
         RestTemplate tokenRequestTemplate = new RestTemplate();
-        ResponseEntity<String> response = tokenRequestTemplate.exchange("https://github.com/login/oauth/access_token",
+        ResponseEntity<String> response = tokenRequestTemplate.exchange(TOKEN_REQUEST_URL,
                 HttpMethod.POST,
                 getCodeRequestHttpEntity(code),
                 String.class);

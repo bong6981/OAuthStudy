@@ -1,7 +1,6 @@
 package com.bongf.oauthPractice;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.slf4j.LoggerFactory;
 
 public class GithubProfile {
     private String login;
