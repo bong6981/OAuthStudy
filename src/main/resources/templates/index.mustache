@@ -9,6 +9,7 @@
         <a href="https://github.com/login/oauth/authorize?client_id=dc22c009d469094cbe0e">Github login</a>
     {{/user}}
     {{#user}}
+        <a href="/personal">개인 정보</a>
         <form method="post" action="/logout">
             <input type="submit" value="logout">
         </form>
