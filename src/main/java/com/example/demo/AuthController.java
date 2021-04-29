@@ -1,19 +1,19 @@
 package com.example.demo;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.http.*;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpSession;
-import java.net.URI;
 import java.util.Optional;
 
-@Controller
+@RestController
 @RequestMapping("/auth")
 public class AuthController {
 
@@ -25,16 +25,13 @@ public class AuthController {
     private final String CLIENT_ID;
     private final String CLIENT_SECRET;
 
-    //private final Environment environment;
-
     public AuthController(Environment environment) {
-        //this.environment = environment;
         CLIENT_ID = environment.getProperty("github.client.id");
         CLIENT_SECRET = environment.getProperty("github.client.secret");
     }
 
     @GetMapping
-    public String auth(String code, HttpSession session) {
+    public ResponseEntity<JwtJson> auth(String code) {
         RestTemplate gitHubRequest = new RestTemplate();
         GithubAccessTokenResponse accessToken = getAccessToken(code, gitHubRequest)
                 .orElseThrow(() -> new RuntimeException("바디 없음"));
@@ -42,9 +39,22 @@ public class AuthController {
         User user = getUserFromGitHub(accessToken, gitHubRequest)
                 .orElseThrow(() -> new RuntimeException("바디 없음"));
 
-        session.setAttribute("user", user);
+        String jwt = getJwt(user);
+        return ResponseEntity.ok(new JwtJson(jwt));
+    }
 
-        return "redirect:/";
+    private String getJwt(User user) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256("secret");
+            return JWT.create()
+                    .withClaim("login", user.getLogin())
+                    .withClaim("name", user.getName())
+                    .withIssuer("jwtTest")
+                    .sign(algorithm);
+        } catch (JWTCreationException exception) {
+            //Invalid Signing configuration / Couldn't convert Claims.
+            throw new RuntimeException(exception);
+        }
     }
 
     private Optional<User> getUserFromGitHub(GithubAccessTokenResponse accessToken, RestTemplate gitHubRequest) {

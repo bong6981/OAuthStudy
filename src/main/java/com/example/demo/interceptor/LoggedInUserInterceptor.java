@@ -1,21 +1,47 @@
 package com.example.demo.interceptor;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.JWTVerifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 public class LoggedInUserInterceptor implements HandlerInterceptor {
 
+    private final Logger logger = LoggerFactory.getLogger(LoggedInUserInterceptor.class);
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        HttpSession session = request.getSession();
-        if (session.getAttribute("user") != null) {
+        String token = getJwtToken(request);
+        try {
+            Algorithm algorithm = Algorithm.HMAC256("secret");
+            JWTVerifier verifier = JWT.require(algorithm)
+                    .withIssuer("jwtTest")
+                    .build(); //Reusable verifier instance
+            DecodedJWT jwt = verifier.verify(token);
+            logger.info("login:{}", jwt.getClaim("login").asString());
+            logger.info("name:{}", jwt.getClaim("name").asString());
+            request.setAttribute("login", jwt.getClaim("login").asString());
+            request.setAttribute("name", jwt.getClaim("name").asString());
             return true;
+        } catch (JWTVerificationException exception){
+            //Invalid signature/claims
+            throw new RuntimeException(exception);
         }
-        response.sendRedirect("/");
-        return false;
+    }
+
+    private String getJwtToken(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        if (authorization.startsWith("Bearer")) {
+            return authorization.substring("Bearer".length()).trim();
+        }
+        throw new RuntimeException("토큰 없음");
     }
 
 }

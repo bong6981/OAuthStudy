@@ -13,11 +13,7 @@ public class HomeController {
     private final String USER = "user";
 
     @GetMapping
-    public String home(Model model, HttpSession session) {
-        User user = (User) session.getAttribute(USER);
-        if (user != null) {
-            model.addAttribute(USER, user);
-        }
+    public String home() {
         return "index";
     }
 
