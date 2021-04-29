@@ -39,9 +39,25 @@ public class AuthController {
         GithubAccessTokenResponse accessToken = getAccessToken(code, gitHubRequest)
                 .orElseThrow(() -> new RuntimeException("바디 없음"));
 
-        session.setAttribute("accessToken", accessToken.getAccessToken());
+        User user = getUserFromGitHub(accessToken, gitHubRequest)
+                .orElseThrow(() -> new RuntimeException("바디 없음"));
+
+        session.setAttribute("user", user);
 
         return "redirect:/";
+    }
+
+    private Optional<User> getUserFromGitHub(GithubAccessTokenResponse accessToken, RestTemplate gitHubRequest) {
+        RequestEntity<Void> request = RequestEntity
+                .get(GITHUB_USER_URI)
+                .header("Accept", "application/json")
+                .header("Authorization", "token " + accessToken.getAccessToken())
+                .build();
+
+        ResponseEntity<User> response = gitHubRequest
+                .exchange(request, User.class);
+
+        return Optional.ofNullable(response.getBody());
     }
 
     private Optional<GithubAccessTokenResponse> getAccessToken(String code, RestTemplate gitHubRequest) {

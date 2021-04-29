@@ -11,7 +11,7 @@ public class LoggedInUserInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession();
-        if (session.getAttribute("accessToken") != null) {
+        if (session.getAttribute("user") != null) {
             return true;
         }
         response.sendRedirect("/");
