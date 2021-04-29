@@ -5,6 +5,11 @@
     <title>OAuth 2.0 Test</title>
 </head>
 <body>
+    {{^user}}
     <a href="https://github.com/login/oauth/authorize?client_id=dc22c009d469094cbe0e">Github login</a>
+    {{/user}}
+    {{#user}}
+    로그인됨.
+    {{/user}}
 </body>
 </html>

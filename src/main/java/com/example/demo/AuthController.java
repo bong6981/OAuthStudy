@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpSession;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,13 +26,15 @@ public class AuthController {
     private final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final URI GITHUB_ACCESS_TOKEN_URI = UriComponentsBuilder
             .fromUriString("https://github.com/login/oauth/access_token")
-            .build()
-            .toUri();
+            .build().toUri();
 
     private final URI GITHUB_USER_URI = UriComponentsBuilder
             .fromUriString("https://api.github.com/user")
-            .build()
-            .toUri();
+            .build().toUri();
+
+    private final URI HOME = UriComponentsBuilder
+            .fromUriString("/")
+            .build().toUri();
 
     private final Environment environment;
 
@@ -40,7 +43,7 @@ public class AuthController {
     }
 
     @GetMapping
-    public User auth(String code) {
+    public ResponseEntity<Void> auth(String code, HttpSession session) {
         RestTemplate gitHubRequest = new RestTemplate();
         String clientId = environment.getProperty("github.client.id");
         String clientSecret = environment.getProperty("github.client.secret");
@@ -55,16 +58,13 @@ public class AuthController {
 
         GithubAccessTokenResponse accessToken = response.getBody();
 
-        logger.info("token : {}", accessToken.getAccessToken());
+        if (accessToken == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        session.setAttribute("accessToken", accessToken.getAccessToken());
 
-        RequestEntity<Void> userRequestEntity = RequestEntity
-                .get(GITHUB_USER_URI)
-                .header("Authorization", "token " + accessToken.getAccessToken())
-                .build();
-
-        ResponseEntity<User> userResponse = gitHubRequest.exchange(userRequestEntity, User.class);
-
-        logger.info("response : {}", userResponse.getBody());
-        return userResponse.getBody();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setLocation(HOME);
+        return new ResponseEntity<>(httpHeaders, HttpStatus.FOUND);
     }
 }
