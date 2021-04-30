@@ -1,8 +1,12 @@
-package com.example.demo;
+package com.example.demo.controller;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.example.demo.GithubAccessTokenRequest;
+import com.example.demo.GithubAccessTokenResponse;
+import com.example.demo.JwtJson;
+import com.example.demo.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -10,7 +14,6 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.HttpSession;
 import java.util.Optional;
 
 @RestController
